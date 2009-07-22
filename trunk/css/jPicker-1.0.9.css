@@ -50,11 +50,19 @@
   cursor: move;
   height: 12px;
 }
+.jPicker_Title {
+  font-size: 11px !important;
+  font-weight: bold;
+  margin: -2px 0px 0px 0px;
+  padding: 0px;
+  text-align: center;
+  width: 100%;
+}
 .jPicker_ColorMap {
   border: 2px inset #eee;
   cursor: crosshair;
   height: 260px; /* IE 6 incorrectly draws border inside the width and height instead of outside - We will fix this to 256px later */
-  margin: 12px 5px 0px 5px;
+  margin: 0px 5px 0px 5px;
   overflow: hidden; /* hide the overdraw of the Color Map icon when at edge of viewing box */
   padding: 0px;
   position: relative; /* make this element an absolute positioning container */
