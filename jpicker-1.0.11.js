@@ -1,5 +1,5 @@
 ﻿/*
- * jPicker 1.0.10
+ * jPicker 1.0.11
  *
  * jQuery Plugin for Photoshop style color picker
  *
@@ -12,8 +12,32 @@
  * John Dyers' website: (http://johndyer.name)
  * Color Picker page:   (http://johndyer.name/post/2007/09/PhotoShop-like-JavaScript-Color-Picker.aspx)
  *
+ *
+ * Coming Soon
+ * ______________
+ * 1.0.12
+ *     Move to version 1.0.8 broke Internet Explorer 5.5/6 support. The CSS background-position setting does not affect the AlphaImageLoader function required for IE 5.5/6 to support image translucency.
+ *        - Will add a conditional image set for IE 5.5/6 for version 1.0.12.
+ *
+ *     Move the jPicker object to a single instance that all selection instances point to.
+ *        - This will result in much faster operation and initialization for pages with multiple pickers.
+ *        - This will also remove the requirement for Internet Explorer to hide the picker icons for elements higher in the DOM (IE calculates its own z-index for embedded, positioned elements).
+ *
+ *     Add activateCallback option for calling a callback function when the jPicker is activated or its binding is switched to a different picker element.
+ *
+ *     Add configurable string constants to the few fields with text.
+ *        - This will allow default constants for titles, labels, and tooltips to be changed to different languages.
+ *
+ *     Add alpha response on jPicker icon.
+ *
+ *     Better NULL color handling for selecting "No Color Selected" or equivalent.
+ *
  * Change Log
  * ______________
+ * 1.0.11
+ *   Added ability for NULL colors (delete the hex value). Color will be returned as color.hex == ''. Can set the default color to an empty hex string as well.
+ *   cancelCallback now returns the original color for use in programming responses.
+ *
  * 1.0.10
  *   Corrected table layout and tweaked display for more consisent presentation. Nice catch from Jonathan Pasquier.
  *
@@ -137,10 +161,6 @@
                 var map = $this.settings.map; // local copy for YUI compressor
                 bar.w = map && map.width || bar.width();
                 bar.h = map && map.height || bar.height();
-                $this.MinX = 0;
-                $this.MinY = 0;
-                $this.MaxX = bar.w;
-                $this.MaxY = bar.h;
               },
             setArrowPositionFromValues:
               function(e)
@@ -278,7 +298,6 @@
           hexKeyUp = // hex input box key up - validate and set color
             function(e)
             {
-              if (e.target.value == '') return;
               validateHex(e);
               $this.setValuesFromHex();
               $.isFunction($this.valuesChanged) && $this.valuesChanged($this);
@@ -286,7 +305,7 @@
           hexBlur = // hex input box blur - reset to original value if empty
             function(e)
             {
-              if (e.target.value == '') $this.setValuesFromHsv();
+              if (e.target.value == '') $this.setValuesFromHex();
             },
           validateRgb = // validate rgb values
             function(e)
@@ -385,12 +404,13 @@
               function()
               {
                 color.fromHex(fields.hex.val());
-                fields.red.val(color.r);
-                fields.green.val(color.g);
-                fields.blue.val(color.b);
-                fields.hue.val(color.h);
-                fields.saturation.val(color.s);
-                fields.value.val(color.v);
+                var none = fields.hex.val() == '';
+                fields.red.val(none ? '' : color.r);
+                fields.green.val(none ? '' : color.g);
+                fields.blue.val(none ? '' : color.b);
+                fields.hue.val(none ? '' : color.h);
+                fields.saturation.val(none ? '' : color.s);
+                fields.value.val(none ? '' : color.v);
               },
           setAlphaFromValue: // set alpha value when bar changes
               function()
@@ -470,6 +490,7 @@
               {
                 var $this = this;
                 $this.hex = hex;
+                if (hex == '') return;
                 var newRgb = ColorMethods.hexToRgb(hex);
                 $this.r = newRgb.r;
                 $this.g = newRgb.g;
@@ -495,6 +516,7 @@
           function(hex)
           {
             hex = this.validateHex(hex);
+            if (hex == '') return { r: null, g: null, b: null };
             var r = '00', g = '00', b = '00';
             if (hex.length == 6)
             {
@@ -815,11 +837,11 @@
                   updateBarVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: '#' + active.hex,
+                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -834,11 +856,11 @@
                   var active = color.active; // local copy for YUI compressor
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                     if (window.bindToInput)
                       window.input.val(colorPicker.fields.hex.val()).css(
                         {
-                          backgroundColor: '#' + active.hex,
+                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -854,28 +876,34 @@
                   switch (color.mode)
                   {
                     case 'h':
+                      fields.hue.val(active.h);
                       fields.saturation.val(colorMap.x);
                       fields.value.val(100 - colorMap.y);
                       break;
                     case 's':
                       fields.hue.val(colorMap.x);
+                      fields.saturation.val(active.s);
                       fields.value.val(100 - colorMap.y);
                       break;
                     case 'v':
                       fields.hue.val(colorMap.x);
                       fields.saturation.val(100 - colorMap.y);
+                      fields.value.val(active.v);
                       break;
                     case 'r':
-                      fields.blue.val(colorMap.x);
+                      fields.red.val(active.r);
                       fields.green.val(255 - colorMap.y);
+                      fields.blue.val(colorMap.x);
                       break;
                     case 'g':
-                      fields.blue.val(colorMap.x);
                       fields.red.val(255 - colorMap.y);
+                      fields.green.val(active.g);
+                      fields.blue.val(colorMap.x);
                       break;
                     case 'b':
                       fields.red.val(colorMap.x);
                       fields.green.val(255 - colorMap.y);
+                      fields.blue.val(active.b);
                       break;
                   }
                   switch (color.mode)
@@ -894,11 +922,11 @@
                   updateVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: '#' + active.hex,
+                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -948,11 +976,11 @@
                   updateVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: '#' + active.hex,
+                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -1046,7 +1074,7 @@
                 {
                   try
                   {
-                    activeColor.css({ backgroundColor: '#' + colorPicker.color.hex });
+                    activeColor.css({ backgroundColor: colorPicker.color.hex == '' ? 'transparent' : '#' + colorPicker.color.hex });
                     setAlpha(activeColor, colorPicker.color.a);
                   }
                   catch (e) { }
@@ -1205,7 +1233,7 @@
                 {
                   revertColor();
                   window.expandable && $this.hide();
-                  $.isFunction($this.cancelCallback) && $this.cancelCallback();
+                  $.isFunction($this.cancelCallback) && $this.cancelCallback(color.active);
                 },
               commitColor = // commit the color changes
                 function()
@@ -1213,15 +1241,15 @@
                   var active = color.active; // local copies for YUI compressor
                   color.current = new Color({ hex: active.hex });
                   color.current.a = active.a;
-                  currentColor.css({ backgroundColor: '#' + active.hex });
+                  currentColor.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                   setAlpha(currentColor, colorPicker.color.a);
                   if (window.expandable)
                   {
-                    colorBox.css({ backgroundColor: '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: '#' + active.hex,
+                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -1306,7 +1334,7 @@
                       }
                     }
                     color.current = new Color({ hex: color.active.hex, a: color.active.a });
-                    currentColor.css({ backgroundColor: '#' + color.active.hex });
+                    currentColor.css({ backgroundColor: color.active.hex == '' ? 'transparent' : '#' + color.active.hex });
                     setAlpha(currentColor, color.active.a);
                     container.css({ display: 'block' });
                     colorMap.setPositioningVariables();
@@ -1675,4 +1703,4 @@
           }
         }
     };
-})(jQuery, '1.0.10');
+})(jQuery, '1.0.11');
