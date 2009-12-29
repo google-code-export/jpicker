@@ -1,5 +1,5 @@
 ﻿/*
- * jPicker 1.0.11
+ * jPicker 1.0.11b
  *
  * jQuery Plugin for Photoshop style color picker
  *
@@ -36,6 +36,7 @@
  * ______________
  * 1.0.11b
  *   Corrected NULL behavior in IE. jQuery was getting an exception when attempting to assign a backgroundColor style of '#'. Now assigns 'transparent' if color is NULL.
+ *   Can now create new Color object WITH OR WITHOUT the '#' prefix.
  *
  * 1.0.11
  *   Added ability for NULL colors (delete the hex value). Color will be returned as color.hex == ''. Can set the default color to an empty hex string as well.
