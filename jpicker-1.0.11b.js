@@ -34,6 +34,9 @@
  *
  * Change Log
  * ______________
+ * 1.0.11b
+ *   Corrected NULL behavior in IE. jQuery was getting an exception when attempting to assign a backgroundColor style of '#'. Now assigns 'transparent' if color is NULL.
+ *
  * 1.0.11
  *   Added ability for NULL colors (delete the hex value). Color will be returned as color.hex == ''. Can set the default color to an empty hex string as well.
  *   cancelCallback now returns the original color for use in programming responses.
@@ -333,7 +336,7 @@
             function(e)
             {
               if (!validateKey(e)) return e;
-              fields.hex.val(fields.hex.val().replace(/[^a-fA-F0-9]/g, '0').toLowerCase().substring(0, 6));
+              fields.hex.val(fields.hex.val().replace(/[^a-fA-F0-9]/g, '').toLowerCase().substring(0, 6));
             },
           validateKey = // validate key
             function(e)
@@ -489,6 +492,7 @@
               function(hex)
               {
                 var $this = this;
+                hex = ColorMethods.validateHex(hex);
                 $this.hex = hex;
                 if (hex == '') return;
                 var newRgb = ColorMethods.hexToRgb(hex);
@@ -504,7 +508,7 @@
           });
           if (init)
           {
-            if (init.hex) $this.fromHex(init.hex);
+            if (init.hex != null) $this.fromHex(init.hex);
             else if (!isNaN(init.r)) $this.fromRgb(init.r, init.g, init.b);
             else if (!isNaN(init.h)) $this.fromHsv(init.h, init.s, init.v);
             if (!isNaN(init.a)) $this.a = init.a;
@@ -543,7 +547,7 @@
       validateHex:
           function(hex)
           {
-            hex = hex.toLowerCase().replace(/[^a-f0-9]/g, '0');
+            hex = hex.toLowerCase().replace(/[^a-f0-9]/g, '');
             if (hex.length > 6) hex = hex.substring(0, 6);
             return hex;
           },
@@ -737,7 +741,7 @@
                         function(img)
                         {
                           setAlpha(img, 100);
-                          img.css({ backgroundColor: '', backgroundPosition: '0px 0px', filter: '' });
+                          img.css({ backgroundColor: 'transparent', backgroundPosition: '0px 0px', filter: '' });
                         };
                   resetImage(colorMapL1); // reset images
                   resetImage(colorMapL2);
@@ -750,7 +754,7 @@
                   {
                     case 'h':
                       hue.attr('checked', true);
-                      colorMapL1.css({ backgroundColor: '#' + active.hex });
+                      colorMapL1.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                       colorMapL2.css({ backgroundColor: 'transparent' });
                       setImgLoc(colorMapL2, -256);
                       setAlpha(colorMapL2, 100);
@@ -774,7 +778,7 @@
                       value.attr('checked', true);
                       setBG(colorMapL1, '000');
                       setImgLoc(colorMapL2, -1024);
-                      colorBarL3.css({ backgroundColor: '#' + active.hex });
+                      colorBarL3.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                       setImgLoc(colorBarL4, -768);
                       colorMap.mxX = 360;
                       colorMap.mxY = 100;
@@ -837,11 +841,11 @@
                   updateBarVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
+                          backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent',
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -856,11 +860,11 @@
                   var active = color.active; // local copy for YUI compressor
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                     if (window.bindToInput)
                       window.input.val(colorPicker.fields.hex.val()).css(
                         {
-                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
+                          backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent',
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -922,11 +926,11 @@
                   updateVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
+                          backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent',
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -976,11 +980,11 @@
                   updateVisuals();
                   if (window.expandable && window.liveUpdate)
                   {
-                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
+                          backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent',
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -1074,7 +1078,7 @@
                 {
                   try
                   {
-                    activeColor.css({ backgroundColor: colorPicker.color.hex == '' ? 'transparent' : '#' + colorPicker.color.hex });
+                    activeColor.css({ backgroundColor: colorPicker.color.hex && colorPicker.color.hex.length == 6 ? '#' + colorPicker.color.hex : 'transparent' });
                     setAlpha(activeColor, colorPicker.color.a);
                   }
                   catch (e) { }
@@ -1164,11 +1168,7 @@
               setBG =
                 function(el, c)
                 {
-                  try
-                  {
-                    el.css({ backgroundColor: '#' + c });
-                  }
-                  catch (e) { }
+                  el.css({ backgroundColor: c && c.length == 6 ? '#' + c : 'transparent' });
                 },
               setImg =
                 function(img, src)
@@ -1241,15 +1241,15 @@
                   var active = color.active; // local copies for YUI compressor
                   color.current = new Color({ hex: active.hex });
                   color.current.a = active.a;
-                  currentColor.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                  currentColor.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                   setAlpha(currentColor, colorPicker.color.a);
                   if (window.expandable)
                   {
-                    colorBox.css({ backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex });
+                    colorBox.css({ backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent' });
                     if (window.bindToInput)
                       window.input.val(active.hex).css(
                         {
-                          backgroundColor: active.hex == '' ? 'transparent' : '#' + active.hex,
+                          backgroundColor: active.hex && active.hex.length == 6 ? '#' + active.hex : 'transparent',
                           color: active.v > 75 ? '#000000' : '#ffffff'
                         });
                   }
@@ -1334,7 +1334,7 @@
                       }
                     }
                     color.current = new Color({ hex: color.active.hex, a: color.active.a });
-                    currentColor.css({ backgroundColor: color.active.hex == '' ? 'transparent' : '#' + color.active.hex });
+                    currentColor.css({ backgroundColor: color.active.hex && color.active.hex.length == 6 ? '#' + color.active.hex : 'transparent' });
                     setAlpha(currentColor, color.active.a);
                     container.css({ display: 'block' });
                     colorMap.setPositioningVariables();
@@ -1421,7 +1421,7 @@
                   top: window.position.y == 'top' ? '-350px' : window.position.y == 'center' ? '-158px' : window.position.y == 'bottom' ? '25px' : window.position.y
                 });
             // if default colors are hex strings, change them to color objects
-            if ((typeof (color.active)).toString().toLowerCase() == 'string') color.active = new Color({ hex: color.active.substring(1) });
+            if ((typeof (color.active)).toString().toLowerCase() == 'string') color.active = new Color({ hex: color.active });
             // inject html source code - we are using a single table for this control - I know tables are considered bad, but it takes care of equal height columns and
             // this control really is tabular data, so I believe it is the right move
             if (!color.alphaSupport) color.active.a = 100;
@@ -1447,8 +1447,8 @@
             alphaCheckbox = $('.jPicker_AlphaCheckbox', container);
             alphaBarDiv = $('.jPicker_AlphaBar', container);
             currentActiveBG = $('.jPicker_NewCurrent', container);
-            activeColor = $('.jPicker_Active', container).css({ backgroundColor: '#' + color.active.hex });
-            currentColor = $('.jPicker_Current', container).css({ backgroundColor: '#' + color.active.hex });
+            activeColor = $('.jPicker_Active', container).css({ backgroundColor: color.active.hex && color.active.hex.length == 6 ? '#' + color.active.hex : 'transparent' });
+            currentColor = $('.jPicker_Current', container).css({ backgroundColor: color.active.hex && color.active.hex.length == 6 ? '#' + color.active.hex : 'transparent' });
             okButton = $('.jPicker_Ok', container);
             cancelButton = $('.jPicker_Cancel', container);
             grid = $('.jPicker_Grid', container);
@@ -1532,7 +1532,7 @@
             // bind to input
             if (window.expandable)
             {
-              colorBox = $('.jPicker_Color', $this.next()).css({ backgroundColor: '#' + color.active.hex });
+              colorBox = $('.jPicker_Color', $this.next()).css({ backgroundColor: color.active.hex && color.active.hex.length == 6 ? '#' + color.active.hex : 'transparent' });
               colorIcon = $('.jPicker_Icon', $this.next()).css(
                 {
                   backgroundImage: 'url(' + images.clientPath + images.picker.file + ')'
@@ -1553,7 +1553,7 @@
                 /* if default colors are hex strings, change them to color objects */
                 if ((typeof (color.quickList[i])).toString().toLowerCase() == 'string') color.quickList[i] = new Color({ hex: color.quickList[i].substring(1) });
                 grid.append('<span class="jPicker_QuickColor" title="#' + color.quickList[i].hex + '">&nbsp;</span>');
-                $('.jPicker_QuickColor', container).eq(i).css({ backgroundColor: '#' + color.quickList[i].hex }).bind('click', { i: i }, quickPickClicked);
+                $('.jPicker_QuickColor', container).eq(i).css({ backgroundColor: color.quickList[i].hex && color.quickList[i].hex.length == 6 ? '#' + color.quickList[i].hex : 'transparent' }).bind('click', { i: i }, quickPickClicked);
               }
             }
             setColorMode(color.mode);
@@ -1582,11 +1582,11 @@
       color:
         {
           mode: 'h', /* acceptabled values "h" (hue), "s" (saturation), "v" (brightness), "r" (red), "g" (green), "b" (blue) */
-          active: new Color({ hex: 'ffc000' }), /* acceptable values are any declared $.jPicker.Color object or string HEX value (e.g. #ffc000) INCLUDING the "#" prefix */
+          active: new Color({ hex: '#ffcc00' }), /* acceptable values are any declared $.jPicker.Color object or string HEX value (e.g. #ffc000) WITH OR WITHOUT the "#" prefix */
           alphaSupport: false, /* change to true to enable alpha editing support (without this, alpha will always be 100) */
           quickList: /* the quick pick color list */
             [
-              new Color({ h: 360, s: 33, v: 100 }), /* acceptable values are any declared $.jPicker.Color object or string HEX value (e.g. #ffc000) INCLUDING the "#" prefix */
+              new Color({ h: 360, s: 33, v: 100 }), /* acceptable values are any declared $.jPicker.Color object or string HEX value (e.g. #ffc000) WITH OR WITHOUT the "#" prefix */
               new Color({ h: 360, s: 66, v: 100 }),
               new Color({ h: 360, s: 100, v: 100 }),
               new Color({ h: 360, s: 100, v: 75 }),
@@ -1703,4 +1703,4 @@
           }
         }
     };
-})(jQuery, '1.0.11');
+})(jQuery, '1.0.11b');
