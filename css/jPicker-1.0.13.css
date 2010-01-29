@@ -58,7 +58,10 @@
   width: 100%;
 }
 .jPicker_ColorMap {
-  border: 2px inset #eee;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #9a9a9a;
+  border-right: 2px solid #fff;
+  border-top: 2px solid #9a9a9a;
   cursor: crosshair;
   height: 260px; /* IE 6 incorrectly draws border inside the width and height instead of outside - We will fix this to 256px later */
   margin: 0px 5px 0px 5px;
@@ -72,10 +75,14 @@ div[class="jPicker_ColorMap"] {
   width: 256px; /* correct to 256px for browsers that support the "[class="xxx"]" selector (IE7+,Firefox,Safari,Chrome,Opera,etc.) */
 }
 .jPicker_ColorBar {
-  border: 2px inset #eee;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #9a9a9a;
+  border-right: 2px solid #fff;
+  border-top: 2px solid #9a9a9a;
   cursor: n-resize;
   height: 260px; /* IE 6 incorrectly draws border inside the width and height instead of outside - We will fix this to 256px later */
   margin: 12px 10px 0px 5px;
+  overflow: hidden;
   padding: 0px;
   position: relative;
   width: 24px; /* IE 6 incorrectly draws border inside the width and height instead of outside - We will fix this to 20px later */
@@ -88,17 +95,22 @@ div[class="jPicker_ColorBar"] {
   background-color: transparent;
   background-image: none;
   display: block;
-  height: 256px; /* must specific pixel height. IE7/8 Quirks mode ignores opacity for an absolutely positioned item in a relative container with "overflow: visible". The marker in the colorBar
-                    would not be drawn if its overflow is set to hidden. */
   left: 0px;
   position: absolute;
   top: 0px;
 }
 .jPicker_ColorMap_l1, .jPicker_ColorMap_l2, .jPicker_ColorMap_l3 {
+  height: 2596px;
   width: 256px; /* must specific pixel width. IE7/8 Quirks mode ignores opacity for an absolutely positioned item in a relative container with "overflow: visible". The marker in the colorBar
                    would not be drawn if its overflow is set to hidden. */
 }
-.jPicker_ColorBar_l1, .jPicker_ColorBar_l2, .jPicker_ColorBar_l3, .jPicker_ColorBar_l4, .jPicker_ColorBar_l5, .jPicker_ColorBar_l6 {
+.jPicker_ColorBar_l1, .jPicker_ColorBar_l2, .jPicker_ColorBar_l3, .jPicker_ColorBar_l4 {
+  height: 3896px;
+  width: 20px; /* must specific pixel width. IE7/8 Quirks mode ignores opacity for an absolutely positioned item in a relative container with "overflow: visible". The marker in the colorBar
+                  would not be drawn if its overflow is set to hidden. */
+}
+.jPicker_ColorBar_l5, .jPicker_ColorBar_l6 {
+  height: 256px;
   width: 20px; /* must specific pixel width. IE7/8 Quirks mode ignores opacity for an absolutely positioned item in a relative container with "overflow: visible". The marker in the colorBar
                   would not be drawn if its overflow is set to hidden. */
 }
@@ -117,7 +129,7 @@ div[class="jPicker_ColorBar"] {
 }
 .jPicker_ColorBar_Arrow {
   display: block;
-  left: -10px; /* (arrow width / 2) - (element width / 2) - position arrows' center in elements' center */
+  left: 0px; /* (arrow width / 2) - (element width / 2) - position arrows' center in elements' center */
   position: absolute;
 }
 .jPicker_Preview {
