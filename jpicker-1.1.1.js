@@ -1,5 +1,5 @@
 ﻿/*
- * jPicker 1.1.0
+ * jPicker 1.1.1
  *
  * jQuery Plugin for Photoshop style color picker
  *
@@ -25,7 +25,7 @@
  *
  * Coming Soon
  * ______________
- * 1.1.1
+ *
  *     Will consider supporting jQuery ThemeRoller CSS API for theming the UI if demand exists.
  *
  * Planned For Future Release
@@ -38,9 +38,11 @@
  *   Add activateCallback option for calling a callback function when the jPicker is activated or its binding is switched to a different picker element.
  *
  *
- *
  * Change Log
  * ______________
+ * 1.1.1
+ *   Correct IE exception caused by attempting to set "#transparent" to CSS background-color.
+ *
  * 1.1.0
  *   Reworked nearly the entire plugin including the internal and external event model, bindings, DOM searches, classes, and overall presentation.
  *   The Color object now supports a changed event that you can bind to (or just bind to the picker events still included).
@@ -1391,7 +1393,7 @@
             setBG =
               function(el, c)
               {
-                el.css({ backgroundColor: c && '#' + c || 'transparent' });
+                el.css({ backgroundColor: c && c.length == 6 && '#' + c || 'transparent' });
               },
             setImg =
               function(img, src)
@@ -1935,4 +1937,4 @@
           }
         }
     };
-})(jQuery, '1.1.0');
+})(jQuery, '1.1.1');
