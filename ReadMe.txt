@@ -1,4 +1,4 @@
-﻿jPicker 1.1.2
+﻿jPicker 1.1.3
 
 jQuery Plugin for Photoshop style color picker
 
@@ -41,6 +41,5 @@ ______________
 
   Move the jPicker object to a single instance that all selection instances point to.
      - This will result in much faster operation and initialization for pages with multiple pickers.
-     - This will also remove the requirement for Internet Explorer to hide the picker icons for elements higher in the DOM (IE calculates its own z-index for embedded, positioned elements).
 
   Add activateCallback option for calling a callback function when the jPicker is activated or its binding is switched to a different picker element.

@@ -24,7 +24,7 @@
   top: 0px;
   width: 100%;
 }
-.jPicker .Container {
+.jPicker.Container {
   display: none;
   z-index: 10; /* make sure container draws above color picker icon in Firefox/Safari/Chrome/Opera/etc. -
                   IE calculates z-index so this won't work - we will hide all color picker icons placed after the selected one in code when shown in IE */

@@ -1,5 +1,5 @@
 ﻿/*
- * jPicker 1.1.2
+ * jPicker 1.1.3
  *
  * jQuery Plugin for Photoshop style color picker
  *
@@ -49,9 +49,7 @@
                 }, 0);
               // Bind mousemove and mouseup event to the document so it responds when dragged of of the bar - we will unbind these when on mouseup to save processing
               $(document).bind('mousemove', mouseMove).bind('mouseup', mouseUp);
-              e.stopPropagation();
               e.preventDefault(); // don't try to select anything or drag the image to the desktop
-              return false;
             },
           mouseMove = // set the values as the mouse moves
             function(e)
@@ -1443,7 +1441,7 @@
                 var va = ui.val('va');
                 iconColor.css({ backgroundColor: hex && '#' + hex || 'transparent' });
                 setAlpha.call($this, iconAlpha, 100 - (va && va.a || 0));
-                if (settings.window.bindToInput)
+                if (settings.window.bindToInput&&settings.window.updateInputColor)
                   settings.window.input.css(
                     {
                       backgroundColor: hex && '#' + hex || 'transparent',
@@ -1461,9 +1459,7 @@
                 pageStartY = e.pageY;
                 // bind events to document to move window - we will unbind these on mouseup
                 $(document).bind('mousemove', documentMouseMove).bind('mouseup', documentMouseUp);
-                e.stopPropagation();
                 e.preventDefault(); // prevent attempted dragging of the column
-                return false;
               },
             documentMouseMove =
               function(e)
@@ -1495,15 +1491,6 @@
             show =
               function()
               {
-                if (document.all) // In IE, due to calculated z-index values, we need to hide all color picker icons that appear later in the source code than this one
-                {
-                  var foundthis = false;
-                  for (i = 0; i < List.length; i++)
-                  {
-                    if (foundthis) List[i].icon.css({ display: 'none' });
-                    if (List[i] == $this) foundthis = true;
-                  }
-                }
                 color.current.val('ahex', color.active.val('ahex'));
                 switch (settings.window.effects.type)
                 {
@@ -1548,22 +1535,44 @@
             initialize =
               function()
               {
-                var win = settings.window;
-                container = win.expandable ? $($this).next().find('.Container:first') : $($this);
-                if (win.expandable)
-                  container.css( // positions must be set and display set to absolute before source code injection or IE will size the container to fit the window
-                    {
-                      left: win.position.x == 'left' ? (0 - 520 - (win.position.y == 'center' ? 25 : 0)) + 'px' : win.position.x == 'center' ? '-249px' :
-                        win.position.x == 'right' ? (0 + (win.position.y == 'center' ? 25 : 0)) + 'px' : win.position.x == 'screenCenter' ?
-                        (($(document).width() >> 1) - 249) - $($this).next().offset().left + 'px' : win.position.x,
-                      position: 'absolute',
-                      top: win.position.y == 'top' ? '-312px' : win.position.y == 'center' ? '-156px' : win.position.y == 'bottom' ? '25px' : win.position.y
-                    });
+                var win = settings.window,
+                    popup = win.expandable ? $($this).next().find('.Container:first') : null;
+                container = win.expandable ? $('<div class="jPicker Container"/>') : $($this);
+                container.get(0).onselectstart=function(){return false;};
                 // if default colors are hex strings, change them to color objects
                 if ((typeof (color.active)).toString().toLowerCase() == 'string') color.active = new Color({ ahex: color.active });
                 // inject html source code - we are using a single table for this control - I know tables are considered bad, but it takes care of equal height columns and
                 // this control really is tabular data, so I believe it is the right move
-                container.html('<table class="jPicker" cellpadding="0" cellspacing="0"><tbody>' + (win.expandable ? '<tr><td class="Move" colspan="6">&nbsp;</td></tr>' : '') + '<tr><td rowspan="9"><h2 class="Title">' + (win.title || localization.text.title) + '</h2><div class="Map"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><img src="' + images.clientPath + images.colorMap.arrow.file + '" class="Arrow"/></div></td><td rowspan="9"><div class="Bar"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><span class="Map4">&nbsp;</span><span class="Map5">&nbsp;</span><span class="Map6">&nbsp;</span><img src="' + images.clientPath + images.colorBar.arrow.file + '" class="Arrow"/></div></td><td colspan="3" class="Preview">' + localization.text.newColor + '<div><span class="Active" title="' + localization.tooltips.colors.newColor + '">&nbsp;</span><span class="Current" title="' + localization.tooltips.colors.currentColor + '">&nbsp;</span></div>' + localization.text.currentColor + '</td><td rowspan="9" class="Button"><input type="button" class="Ok" value="' + localization.text.ok + '" title="' + localization.tooltips.buttons.ok + '"/><input type="button" class="Cancel" value="' + localization.text.cancel + '" title="' + localization.tooltips.buttons.cancel + '"/><hr/><div class="Grid">&nbsp;</div></td></tr><tr class="Hue"><td class="Radio"><input type="radio" id="jPicker_Hue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="h" title="' + localization.tooltips.hue.radio + '"' + (settings.color.mode == 'h' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Hue_' + List.length + '" title="' + localization.tooltips.hue.radio + '">H:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('h') + '" title="' + localization.tooltips.hue.textbox + '"/>&nbsp;&deg;</td></tr><tr class="Saturation"><td class="Radio"><input type="radio" id="jPicker_Saturation_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="s" title="' + localization.tooltips.saturation.radio + '"' + (settings.color.mode == 's' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Saturation_' + List.length + '" title="' + localization.tooltips.saturation.radio + '">S:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('s') + '" title="' + localization.tooltips.saturation.textbox + '"/>&nbsp;%</td></tr><tr class="Value"><td class="Radio"><input type="radio" id="jPicker_Value_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="v" title="' + localization.tooltips.value.radio + '"' + (settings.color.mode == 'v' ? ' checked="checked"' : '') + '/><br/><br/></td><td class="Label"><label for="jPicker_Value_' + List.length + '" title="' + localization.tooltips.value.radio + '">V:</label><br/><br/></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('v') + '" title="' + localization.tooltips.value.textbox + '"/>&nbsp;%<br/><br/></td></tr><tr class="Red"><td class="Radio"><input type="radio" id="jPicker_Red_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="r" title="' + localization.tooltips.red.radio + '"' + (settings.color.mode == 'r' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Red_' + List.length + '" title="' + localization.tooltips.red.radio + '">R:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('r') + '" title="' + localization.tooltips.red.textbox + '"/></td></tr><tr class="Green"><td class="Radio"><input type="radio" id="jPicker_Green_' + List.length + '" name="jPicker_Mode_'+List.length+'" value="g" title="' + localization.tooltips.green.radio + '"' + (settings.color.mode == 'g' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Green_' + List.length + '" title="' + localization.tooltips.green.radio + '">G:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('g') + '" title="' + localization.tooltips.green.textbox + '"/></td></tr><tr class="Blue"><td class="Radio"><input type="radio" id="jPicker_Blue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="b" title="' + localization.tooltips.blue.radio + '"' + (settings.color.mode == 'b' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Blue_' + List.length + '" title="' + localization.tooltips.blue.radio + '">B:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('b') + '" title="' + localization.tooltips.blue.textbox + '"/></td></tr><tr class="Alpha"><td class="Radio">' + (win.alphaSupport ? '<input type="radio" id="jPicker_Alpha_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="a" title="' + localization.tooltips.alpha.radio + '"' + (settings.color.mode == 'a' ? ' checked="checked"' : '') + '/>' : '&nbsp;') + '</td><td class="Label">' + (win.alphaSupport ? '<label for="jPicker_Alpha_' + List.length + '" title="' + localization.tooltips.alpha.radio + '">A:</label>' : '&nbsp;') + '</td><td class="Text">' + (win.alphaSupport ? '<input type="text" maxlength="3" value="' + color.active.val('a') + '" title="' + localization.tooltips.alpha.textbox + '"/>&nbsp;%' : '&nbsp;') + '</td></tr><tr class="Hex"><td colspan="3" class="Text"><label for="jPicker_Hex_' + List.length + '" title="' + localization.tooltips.hex.textbox + '">#:</label><input type="text" maxlength="6" class="Hex" id="jPicker_Hex_' + List.length+'" value="' + color.active.val('hex') + '" title="' + localization.tooltips.hex.textbox + '"/>' + (win.alphaSupport ? '<input type="text" maxlength="2" class="AHex" value="' + color.active.val('ahex').substring(6) + '" title="' + localization.tooltips.hex.alpha + '"/></td>' : '&nbsp;') + '</tr></tbody></table>');
+                var controlHtml='<table class="jPicker" cellpadding="0" cellspacing="0"><tbody>' + (win.expandable ? '<tr><td class="Move" colspan="6">&nbsp;</td></tr>' : '') + '<tr><td rowspan="9"><h2 class="Title">' + (win.title || localization.text.title) + '</h2><div class="Map"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><img src="' + images.clientPath + images.colorMap.arrow.file + '" class="Arrow"/></div></td><td rowspan="9"><div class="Bar"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><span class="Map4">&nbsp;</span><span class="Map5">&nbsp;</span><span class="Map6">&nbsp;</span><img src="' + images.clientPath + images.colorBar.arrow.file + '" class="Arrow"/></div></td><td colspan="3" class="Preview">' + localization.text.newColor + '<div><span class="Active" title="' + localization.tooltips.colors.newColor + '">&nbsp;</span><span class="Current" title="' + localization.tooltips.colors.currentColor + '">&nbsp;</span></div>' + localization.text.currentColor + '</td><td rowspan="9" class="Button"><input type="button" class="Ok" value="' + localization.text.ok + '" title="' + localization.tooltips.buttons.ok + '"/><input type="button" class="Cancel" value="' + localization.text.cancel + '" title="' + localization.tooltips.buttons.cancel + '"/><hr/><div class="Grid">&nbsp;</div></td></tr><tr class="Hue"><td class="Radio"><input type="radio" id="jPicker_Hue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="h" title="' + localization.tooltips.hue.radio + '"' + (settings.color.mode == 'h' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Hue_' + List.length + '" title="' + localization.tooltips.hue.radio + '">H:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('h') + '" title="' + localization.tooltips.hue.textbox + '"/>&nbsp;&deg;</td></tr><tr class="Saturation"><td class="Radio"><input type="radio" id="jPicker_Saturation_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="s" title="' + localization.tooltips.saturation.radio + '"' + (settings.color.mode == 's' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Saturation_' + List.length + '" title="' + localization.tooltips.saturation.radio + '">S:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('s') + '" title="' + localization.tooltips.saturation.textbox + '"/>&nbsp;%</td></tr><tr class="Value"><td class="Radio"><input type="radio" id="jPicker_Value_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="v" title="' + localization.tooltips.value.radio + '"' + (settings.color.mode == 'v' ? ' checked="checked"' : '') + '/><br/><br/></td><td class="Label"><label for="jPicker_Value_' + List.length + '" title="' + localization.tooltips.value.radio + '">V:</label><br/><br/></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('v') + '" title="' + localization.tooltips.value.textbox + '"/>&nbsp;%<br/><br/></td></tr><tr class="Red"><td class="Radio"><input type="radio" id="jPicker_Red_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="r" title="' + localization.tooltips.red.radio + '"' + (settings.color.mode == 'r' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Red_' + List.length + '" title="' + localization.tooltips.red.radio + '">R:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('r') + '" title="' + localization.tooltips.red.textbox + '"/></td></tr><tr class="Green"><td class="Radio"><input type="radio" id="jPicker_Green_' + List.length + '" name="jPicker_Mode_'+List.length+'" value="g" title="' + localization.tooltips.green.radio + '"' + (settings.color.mode == 'g' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Green_' + List.length + '" title="' + localization.tooltips.green.radio + '">G:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('g') + '" title="' + localization.tooltips.green.textbox + '"/></td></tr><tr class="Blue"><td class="Radio"><input type="radio" id="jPicker_Blue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="b" title="' + localization.tooltips.blue.radio + '"' + (settings.color.mode == 'b' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Blue_' + List.length + '" title="' + localization.tooltips.blue.radio + '">B:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('b') + '" title="' + localization.tooltips.blue.textbox + '"/></td></tr><tr class="Alpha"><td class="Radio">' + (win.alphaSupport ? '<input type="radio" id="jPicker_Alpha_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="a" title="' + localization.tooltips.alpha.radio + '"' + (settings.color.mode == 'a' ? ' checked="checked"' : '') + '/>' : '&nbsp;') + '</td><td class="Label">' + (win.alphaSupport ? '<label for="jPicker_Alpha_' + List.length + '" title="' + localization.tooltips.alpha.radio + '">A:</label>' : '&nbsp;') + '</td><td class="Text">' + (win.alphaSupport ? '<input type="text" maxlength="3" value="' + color.active.val('a') + '" title="' + localization.tooltips.alpha.textbox + '"/>&nbsp;%' : '&nbsp;') + '</td></tr><tr class="Hex"><td colspan="3" class="Text"><label for="jPicker_Hex_' + List.length + '" title="' + localization.tooltips.hex.textbox + '">#:</label><input type="text" maxlength="6" class="Hex" id="jPicker_Hex_' + List.length+'" value="' + color.active.val('hex') + '" title="' + localization.tooltips.hex.textbox + '"/>' + (win.alphaSupport ? '<input type="text" maxlength="2" class="AHex" value="' + color.active.val('ahex').substring(6) + '" title="' + localization.tooltips.hex.alpha + '"/></td>' : '&nbsp;') + '</tr></tbody></table>';
+                if (win.expandable)
+                {
+                  container.html(controlHtml);
+                  if($(document.body).children('div.jPicker.Container').length==0)$(document.body).prepend(container);
+                  else $(document.body).children('div.jPicker.Container:last').after(container);
+                  container.mousedown(
+                    function()
+                    {
+                      $(document.body).children('div.jPicker.Container').css({zIndex:10});
+                      $(this).css({zIndex:11});
+                    });
+                  container.css( // positions must be set and display set to absolute before source code injection or IE will size the container to fit the window
+                    {
+                      left:
+                        win.position.x == 'left' ? (popup.offset().left - 530 - (win.position.y == 'center' ? 25 : 0)) + 'px' :
+                        win.position.x == 'center' ? (popup.offset().left - 260) + 'px' :
+                        win.position.x == 'right' ? (popup.offset().left - 10 + (win.position.y == 'center' ? 25 : 0)) + 'px' :
+                        win.position.x == 'screenCenter' ? (($(document).width() >> 1) - 260) + 'px' : (popup.offset().left + parseInt(win.position.x)) + 'px',
+                      position: 'absolute',
+                      top: win.position.y == 'top' ? (popup.offset().top - 312) + 'px' :
+                           win.position.y == 'center' ? (popup.offset().top - 156) + 'px' :
+                           win.position.y == 'bottom' ? (popup.offset().top + 25) + 'px' : (popup.offset().top + parseInt(win.position.y)) + 'px'
+                    });
+                }
+                else
+                {
+                  container = $($this);
+                  container.html(controlHtml);
+                }
                 // initialize the objects to the source code just injected
                 var tbody = container.find('tbody:first');
                 colorMapDiv = tbody.find('div.Map:first');
@@ -1656,7 +1665,7 @@
                 // bind to input
                 if (win.expandable)
                 {
-                  $this.icon = container.parents('.Icon:first');
+                  $this.icon = popup.parents('.Icon:first');
                   iconColor = $this.icon.find('.Color:first').css({ backgroundColor: hex && '#' + hex || 'transparent' });
                   iconAlpha = $this.icon.find('.Alpha:first');
                   setImg.call($this, iconAlpha, images.clientPath + 'bar-opacity.png');
@@ -1665,7 +1674,7 @@
                     {
                       backgroundImage: 'url(' + images.clientPath + images.picker.file + ')'
                     }).bind('click', iconImageClicked);
-                  if (win.bindToInput)
+                  if (win.bindToInput&&win.updateInputColor)
                     win.input.css(
                       {
                         backgroundColor: hex && '#' + hex || 'transparent',
@@ -1675,7 +1684,6 @@
                   color.active.bind(expandableColorChanged);
                 }
                 else show.call($this);
-                List.push($this);
               },
             destroy =
               function()
@@ -1737,6 +1745,7 @@
               hide: hide,
               destroy: destroy // destroys this control entirely, removing all events and objects, and removing itself from the List
             });
+          List.push($this);
           setTimeout(
             function()
             {
@@ -1765,7 +1774,8 @@
           },
           expandable: false, /* default to large static picker - set to true to make an expandable picker (small icon with popup) - set automatically when binded to input element */
           liveUpdate: true, /* set false if you want the user to have to click "OK" before the binded input box updates values */
-          alphaSupport: false /* set to true to enable alpha picking */
+          alphaSupport: false, /* set to true to enable alpha picking */
+          updateInputColor: true /* set to false to prevent binded input colors from changing */
         },
       color:
         {
@@ -1944,4 +1954,4 @@
           }
         }
     };
-})(jQuery, '1.1.2');
+})(jQuery, '1.1.3');
