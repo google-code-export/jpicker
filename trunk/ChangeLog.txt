@@ -1,5 +1,12 @@
 ﻿Change Log
 ______________
+1.1.3
+  Now adding popup color pickers to document.body instead of inline with the popup control. This corrects issues with the picker not showing beyond a relative container scope.
+  No longer need to hide popup icon in Internet Explorer for picker elements lower in the DOM than the currently active one since the picker itself is attached to document.body (it is always higher in the DOM now).
+  Popup pickers are now bring-to-front selectable. Clicking on the picker will bring it above all other pickers on the page instead of having to drag one out from underneath another.
+  Corrected jPicker.List/setTimeout bug which allowed an instance to bind to the List in an order other than the order the initialization function was called.
+  Added a updateInputColor option (default true) to allow for a binded input field that does not automatically update its background/text color.
+
 1.1.2
   Reworked the find methods and contexts for element searches. Now using ":first" instead of ".eq(0)" to take advantage of early out searches. Much faster initialization of the picker, on the order of 6 times.
   Now using setTimeout for calling visual updates. Dramatically improved marker dragging in all browsers. Reduces blocking as re-rendering is internal to the browser and independent of the other javascript still in progress.
@@ -16,7 +23,7 @@ ______________
 1.1.0
   Reworked nearly the entire plugin including the internal and external event model, bindings, DOM searches, classes, and overall presentation.
   The Color object now supports a changed event that you can bind to (or just bind to the picker events still included).
-  Event order has been reversed, instead of an change event on the map/bar/text fields updating the display, they now update the Color object which then fires the events that update the display.
+  Event order has been reversed, instead of a change event on the map/bar/text fields updating the display, they now update the Color object which then fires the events that update the display.
   alphaSupport re-implemented by request - default behavior is off.
   Hex code now only 6 characters again.
   Color object can now have its value changed from code, using the "val" method, and it will fire all events necessary to update the display.
