@@ -1,5 +1,5 @@
 ﻿/*
- * jPicker 1.1.3
+ * jPicker 1.1.4
  *
  * jQuery Plugin for Photoshop style color picker
  *
@@ -327,7 +327,7 @@
                   break;
                 case alpha && alpha.get(0):
                   alpha.val(setValueInRange.call($this, alpha.val(), 0, 100));
-                  color.val('a', alpha.val(), e.target);
+                  color.val('a', Math.round((alpha.val() * 255) / 100), e.target);
                   break;
                 case hue.get(0):
                   hue.val(setValueInRange.call($this, hue.val(), 0, 360));
@@ -353,7 +353,7 @@
                   break;
                 case ahex && ahex.get(0):
                   ahex.val(ahex.val().replace(/[^a-fA-F0-9]/g, '').toLowerCase().substring(0, 2));
-                  color.val('a', ahex.val() != null ? ((parseInt(ahex.val(), 16) * 100) / 255) : null, e.target);
+                  color.val('a', ahex.val() != null ? parseInt(ahex.val(), 16) : null, e.target);
                   break;
               }
             },
@@ -367,7 +367,7 @@
                   case red.get(0): red.val(color.val('r')); break;
                   case green.get(0): green.val(color.val('g')); break;
                   case blue.get(0): blue.val(color.val('b')); break;
-                  case alpha && alpha.get(0): alpha.val(color.val('a')); break;
+                  case alpha && alpha.get(0): alpha.val(Math.round((color.val('a') * 1000) / 255) / 10); break;
                   case hue.get(0): hue.val(color.val('h')); break;
                   case saturation.get(0): saturation.val(color.val('s')); break;
                   case value.get(0): value.val(color.val('v')); break;
@@ -413,7 +413,7 @@
               if (context != red.get(0)) red.val(all != null ? all.r : '');
               if (context != green.get(0)) green.val(all != null ? all.g : '');
               if (context != blue.get(0)) blue.val(all != null ? all.b : '');
-              if (alpha && context != alpha.get(0)) alpha.val(all != null ? all.a : '');
+              if (alpha && context != alpha.get(0)) alpha.val(all != null ? Math.round((all.a * 1000) / 255) / 10 : '');
               if (context != hue.get(0)) hue.val(all != null ? all.h : '');
               if (context != saturation.get(0)) saturation.val(all != null ? all.s : '');
               if (context != value.get(0)) value.val(all != null ? all.v : '');
@@ -472,13 +472,12 @@
                 if (!set)
                 {
                   if (name === undefined || name == null || name == '') name = 'all';
+                  if (r == null) return null;
                   switch (name.toLowerCase())
                   {
-                    case 'ahex': return r != null ? ColorMethods.rgbaToHex({ r: r, g: g, b: b, a: a }) : null;
-                    case 'hex':
-                      var ret = val('ahex');
-                      return ret && ret.substring(0, 6) || null;
-                    case 'all': return r != null ? { r: r, g: g, b: b, a: a, h: h, s: s, v: v, hex: val.call($this, 'hex'), ahex: val.call($this, 'ahex') } : null;
+                    case 'ahex': return ColorMethods.rgbaToHex({ r: r, g: g, b: b, a: a });
+                    case 'hex': return val('ahex').substring(0, 6);
+                    case 'all': return { r: r, g: g, b: b, a: a, h: h, s: s, v: v, hex: val.call($this, 'hex'), ahex: val.call($this, 'ahex') };
                     default:
                       var ret={};
                       for (var i = 0; i < name.length; i++)
@@ -567,7 +566,7 @@
                   case 'ahex':
                   case 'hex':
                     var ret = ColorMethods.hexToRgba(value && (value.ahex || value.hex) || value || '00000000');
-                    val.call($this, 'rgba', { r: ret.r, g: ret.g, b: ret.b, a: name == 'ahex' ? ret.a : a != null ? a : 100 }, context);
+                    val.call($this, 'rgba', { r: ret.r, g: ret.g, b: ret.b, a: name == 'ahex' ? ret.a : a != null ? a : 255 }, context);
                     break;
                   default:
                     if (value && (value.ahex != null || value.hex != null))
@@ -624,9 +623,9 @@
                           }
                           break;
                         case 'a':
-                          newV.a = value && value.a != null ? value.a | 0 : value != null ? value | 0 : 100;
+                          newV.a = value && value.a != null ? value.a | 0 : value != null ? value | 0 : 255;
                           if (newV.a < 0) newV.a = 0;
-                          else if (newV.a > 100) newV.a = 100;
+                          else if (newV.a > 255) newV.a = 255;
                           if (a != newV.a)
                           {
                             a = newV.a;
@@ -693,7 +692,7 @@
                         g = ret.g;
                         b = ret.b;
                       }
-                      a = a != null ? a : 100;
+                      a = a != null ? a : 255;
                       fireChangeEvents.call($this, context || $this);
                     }
                     break;
@@ -738,7 +737,7 @@
             {
               hex = this.validateHex(hex);
               if (hex == '') return { r: null, g: null, b: null, a: null };
-              var r = '00', g = '00', b = '00', a = '100';
+              var r = '00', g = '00', b = '00', a = '255';
               if (hex.length == 6) hex += 'ff';
               if (hex.length > 6)
               {
@@ -761,7 +760,7 @@
                 }
                 if (hex.length > 0) b = hex.substring(0, hex.length);
               }
-              return { r: this.hexToInt(r), g: this.hexToInt(g), b: this.hexToInt(b), a: ((this.hexToInt(a) * 100) / 255) | 0 };
+              return { r: this.hexToInt(r), g: this.hexToInt(g), b: this.hexToInt(b), a: this.hexToInt(a) };
             },
           validateHex:
             function(hex)
@@ -773,7 +772,7 @@
           rgbaToHex:
             function(rgba)
             {
-              return this.intToHex(rgba.r) + this.intToHex(rgba.g) + this.intToHex(rgba.b) + this.intToHex(((rgba.a * 255) / 100) | 0);
+              return this.intToHex(rgba.r) + this.intToHex(rgba.g) + this.intToHex(rgba.b) + this.intToHex(rgba.a);
             },
           intToHex:
             function(dec)
@@ -903,7 +902,12 @@
                   input: $($this)
                 }
               });
-            if (ColorMethods.validateHex($($this).val()))
+            if($($this).val()=='')
+            {
+              settings.color.active = new Color({ hex: null });
+              settings.color.current = new Color({ hex: null });
+            }
+            else if (ColorMethods.validateHex($($this).val()))
             {
               settings.color.active = new Color({ hex: $($this).val(), a: settings.color.active.val('a') });
               settings.color.current = new Color({ hex: $($this).val(), a: settings.color.active.val('a') });
@@ -1058,10 +1062,10 @@
                         setAlpha.call($this, colorBarL6, 100);
                       }, 0);
                     colorMap.range('all', { minX: 0, maxX: 360, minY: 0, maxY: 100 });
-                    colorBar.range('rangeY', { minY: 0, maxY: 100 });
+                    colorBar.range('rangeY', { minY: 0, maxY: 255 });
                     if (active.val('ahex') == null) break;
                     colorMap.val('xy', { x: active.val('h'), y: 100 - active.val('v') }, colorMap);
-                    colorBar.val('y', 100 - active.val('a'), colorBar);
+                    colorBar.val('y', 255 - active.val('a'), colorBar);
                     break;
                   default:
                     throw ('Invalid Mode');
@@ -1176,7 +1180,7 @@
                     active.val('b', { b: 255 - ui.val('y') }, context);
                     break;
                   case 'a':
-                    active.val('a', 100 - ui.val('y'), context);
+                    active.val('a', 255 - ui.val('y'), context);
                     break;
                 }
               },
@@ -1240,7 +1244,7 @@
                       break;
                     case 'a':
                       var a = ui.val('a');
-                      colorBar.val('y', 100 - (a != null ? a : 100), context);
+                      colorBar.val('y', 255 - (a != null ? a : 255), context);
                       break;
                   }
                 }
@@ -1252,7 +1256,7 @@
                 {
                   var all = ui.val('all');
                   activePreview.css({ backgroundColor: all && '#' + all.hex || 'transparent' });
-                  setAlpha.call($this, activePreview, all && all.a || 0);
+                  setAlpha.call($this, activePreview, all && ((all.a * 100) / 255) | 0 || 0);
                 }
                 catch (e) { }
               },
@@ -1284,7 +1288,7 @@
                     break;
                 }
                 var a = ui.val('a');
-                setAlpha.call($this, colorMapL3, 100 - (a || 0));
+                setAlpha.call($this, colorMapL3, (((255 - (a || 0)) * 100) / 255) | 0);
               },
             updateBarVisuals =
               function(ui)
@@ -1293,20 +1297,20 @@
                 {
                   case 'h':
                     var a = ui.val('a');
-                    setAlpha.call($this, colorBarL5, 100 - (a || 0));
+                    setAlpha.call($this, colorBarL5, (((255 - (a || 0)) * 100) / 255) | 0);
                     break;
                   case 's':
                     var hva = ui.val('hva'),
                         saturatedColor = new Color({ h: hva && hva.h || 0, s: 100, v: hva != null ? hva.v : 100 });
                     setBG.call($this, colorBarDiv, saturatedColor.val('hex'));
                     setAlpha.call($this, colorBarL2, 100 - (hva != null ? hva.v : 100));
-                    setAlpha.call($this, colorBarL5, 100 - (hva && hva.a || 0));
+                    setAlpha.call($this, colorBarL5, (((255 - (hva && hva.a || 0)) * 100) / 255) | 0);
                     break;
                   case 'v':
                     var hsa = ui.val('hsa'),
                         valueColor = new Color({ h: hsa && hsa.h || 0, s: hsa != null ? hsa.s : 100, v: 100 });
                     setBG.call($this, colorBarDiv, valueColor.val('hex'));
-                    setAlpha.call($this, colorBarL5, 100 - (hsa && hsa.a || 0));
+                    setAlpha.call($this, colorBarL5, (((255 - (hsa && hsa.a || 0)) * 100) / 255) | 0);
                     break;
                   case 'r':
                   case 'g':
@@ -1331,7 +1335,7 @@
                     setAlpha.call($this, colorBarL2, hValue > vValue ? ((hValue - vValue) / (255 - vValue)) * 100 : 0);
                     setAlpha.call($this, colorBarL3, vValue > hValue ? ((vValue - hValue) / (255 - hValue)) * 100 : 0);
                     setAlpha.call($this, colorBarL4, middle / 255 * 100);
-                    setAlpha.call($this, colorBarL5, 100 - (rgba && rgba.a || 0));
+                    setAlpha.call($this, colorBarL5, (((255 - (rgba && rgba.a || 0)) * 100) / 255) | 0);
                     break;
                   case 'a':
                     var a = ui.val('a');
@@ -1401,6 +1405,7 @@
             radioClicked =
               function(e)
               {
+                $(this).parents('tbody:first').find('input:radio[value!="'+e.target.value+'"]').removeAttr('checked');
                 setColorMode.call($this, e.target.value);
               },
             currentClicked =
@@ -1432,7 +1437,7 @@
               {
                 var hex = ui.val('hex');
                 currentPreview.css({ backgroundColor: hex && '#' + hex || 'transparent' });
-                setAlpha.call($this, currentPreview, ui.val('a') || 0);
+                setAlpha.call($this, currentPreview, (((ui.val('a') || 0) * 100) / 255) | 0);
               },
             expandableColorChanged =
               function(ui, context)
@@ -1440,12 +1445,12 @@
                 var hex = ui.val('hex');
                 var va = ui.val('va');
                 iconColor.css({ backgroundColor: hex && '#' + hex || 'transparent' });
-                setAlpha.call($this, iconAlpha, 100 - (va && va.a || 0));
+                setAlpha.call($this, iconAlpha, (((255 - (va && va.a || 0)) * 100) / 255) | 0);
                 if (settings.window.bindToInput&&settings.window.updateInputColor)
                   settings.window.input.css(
                     {
                       backgroundColor: hex && '#' + hex || 'transparent',
-                      color: va && va.v > 75 ? '#000000' : '#ffffff'
+                      color: va == null || va.v > 75 ? '#000000' : '#ffffff'
                     });
               },
             moveBarMouseDown =
@@ -1465,6 +1470,7 @@
               function(e)
               {
                 container.css({ left: elementStartX - (pageStartX - e.pageX) + 'px', top: elementStartY - (pageStartY - e.pageY) + 'px' });
+                if (settings.window.expandable && !$.support.boxModel) container.prev().css({ left: container.css("left"), top: container.css("top") });
                 e.stopPropagation();
                 e.preventDefault();
                 return false;
@@ -1492,43 +1498,46 @@
               function()
               {
                 color.current.val('ahex', color.active.val('ahex'));
+                var attachIFrame = function()
+                  {
+                    if (!settings.window.expandable || $.support.boxModel) return;
+                    var table = container.find('table:first');
+                    container.before('<iframe/>');
+                    container.prev().css({ width: table.width(), height: container.height(), opacity: 0, position: 'absolute', left: container.css("left"), top: container.css("top") });
+                  };
                 switch (settings.window.effects.type)
                 {
                   case 'fade':
-                    container.fadeIn(settings.window.effects.speed.show);
+                    container.fadeIn(settings.window.effects.speed.show, attachIFrame);
                     break;
                   case 'slide':
-                    container.slideDown(settings.window.effects.speed.show);
+                    container.slideDown(settings.window.effects.speed.show, attachIFrame);
                     break;
                   case 'show':
                   default:
-                    container.show(settings.window.effects.speed.show);
+                    container.show(settings.window.effects.speed.show, attachIFrame);
                     break;
                 }
               },
             hide =
               function()
               {
-                if (document.all) // In IE, show the previously hidden color picker icons again
-                {
-                  var foundthis = false;
-                  for (i = 0; i < List.length; i++)
+                var removeIFrame = function()
                   {
-                    if (foundthis) List[i].icon.css({ display: 'inline-block' });
-                    if (List[i] == $this) foundthis = true;
-                  }
-                }
+                    if (!settings.window.expandable || $.support.boxModel) return;
+                    container.prev().remove();
+                  };
                 switch (settings.window.effects.type)
                 {
                   case 'fade':
-                    container.fadeOut(settings.window.effects.speed.hide);
+                    container.fadeOut(settings.window.effects.speed.hide, removeIFrame);
                     break;
                   case 'slide':
-                    container.slideUp(settings.window.effects.speed.hide);
+                    container.slideUp(settings.window.effects.speed.hide, removeIFrame);
                     break;
                   case 'show':
                   default:
-                    container.hide(settings.window.effects.speed.hide);
+                    container.hide(settings.window.effects.speed.hide, removeIFrame);
                     break;
                 }
               },
@@ -1537,13 +1546,16 @@
               {
                 var win = settings.window,
                     popup = win.expandable ? $($this).next().find('.Container:first') : null;
-                container = win.expandable ? $('<div class="jPicker Container"/>') : $($this);
+                container = win.expandable ? $('<div/>') : $($this);
+                container.addClass('jPicker Container');
+                if (win.expandable) container.hide();
                 container.get(0).onselectstart=function(){return false;};
                 // if default colors are hex strings, change them to color objects
                 if ((typeof (color.active)).toString().toLowerCase() == 'string') color.active = new Color({ ahex: color.active });
                 // inject html source code - we are using a single table for this control - I know tables are considered bad, but it takes care of equal height columns and
                 // this control really is tabular data, so I believe it is the right move
-                var controlHtml='<table class="jPicker" cellpadding="0" cellspacing="0"><tbody>' + (win.expandable ? '<tr><td class="Move" colspan="6">&nbsp;</td></tr>' : '') + '<tr><td rowspan="9"><h2 class="Title">' + (win.title || localization.text.title) + '</h2><div class="Map"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><img src="' + images.clientPath + images.colorMap.arrow.file + '" class="Arrow"/></div></td><td rowspan="9"><div class="Bar"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><span class="Map4">&nbsp;</span><span class="Map5">&nbsp;</span><span class="Map6">&nbsp;</span><img src="' + images.clientPath + images.colorBar.arrow.file + '" class="Arrow"/></div></td><td colspan="3" class="Preview">' + localization.text.newColor + '<div><span class="Active" title="' + localization.tooltips.colors.newColor + '">&nbsp;</span><span class="Current" title="' + localization.tooltips.colors.currentColor + '">&nbsp;</span></div>' + localization.text.currentColor + '</td><td rowspan="9" class="Button"><input type="button" class="Ok" value="' + localization.text.ok + '" title="' + localization.tooltips.buttons.ok + '"/><input type="button" class="Cancel" value="' + localization.text.cancel + '" title="' + localization.tooltips.buttons.cancel + '"/><hr/><div class="Grid">&nbsp;</div></td></tr><tr class="Hue"><td class="Radio"><input type="radio" id="jPicker_Hue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="h" title="' + localization.tooltips.hue.radio + '"' + (settings.color.mode == 'h' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Hue_' + List.length + '" title="' + localization.tooltips.hue.radio + '">H:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('h') + '" title="' + localization.tooltips.hue.textbox + '"/>&nbsp;&deg;</td></tr><tr class="Saturation"><td class="Radio"><input type="radio" id="jPicker_Saturation_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="s" title="' + localization.tooltips.saturation.radio + '"' + (settings.color.mode == 's' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Saturation_' + List.length + '" title="' + localization.tooltips.saturation.radio + '">S:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('s') + '" title="' + localization.tooltips.saturation.textbox + '"/>&nbsp;%</td></tr><tr class="Value"><td class="Radio"><input type="radio" id="jPicker_Value_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="v" title="' + localization.tooltips.value.radio + '"' + (settings.color.mode == 'v' ? ' checked="checked"' : '') + '/><br/><br/></td><td class="Label"><label for="jPicker_Value_' + List.length + '" title="' + localization.tooltips.value.radio + '">V:</label><br/><br/></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('v') + '" title="' + localization.tooltips.value.textbox + '"/>&nbsp;%<br/><br/></td></tr><tr class="Red"><td class="Radio"><input type="radio" id="jPicker_Red_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="r" title="' + localization.tooltips.red.radio + '"' + (settings.color.mode == 'r' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Red_' + List.length + '" title="' + localization.tooltips.red.radio + '">R:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('r') + '" title="' + localization.tooltips.red.textbox + '"/></td></tr><tr class="Green"><td class="Radio"><input type="radio" id="jPicker_Green_' + List.length + '" name="jPicker_Mode_'+List.length+'" value="g" title="' + localization.tooltips.green.radio + '"' + (settings.color.mode == 'g' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Green_' + List.length + '" title="' + localization.tooltips.green.radio + '">G:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('g') + '" title="' + localization.tooltips.green.textbox + '"/></td></tr><tr class="Blue"><td class="Radio"><input type="radio" id="jPicker_Blue_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="b" title="' + localization.tooltips.blue.radio + '"' + (settings.color.mode == 'b' ? ' checked="checked"' : '') + '/></td><td class="Label"><label for="jPicker_Blue_' + List.length + '" title="' + localization.tooltips.blue.radio + '">B:</label></td><td class="Text"><input type="text" maxlength="3" value="' + color.active.val('b') + '" title="' + localization.tooltips.blue.textbox + '"/></td></tr><tr class="Alpha"><td class="Radio">' + (win.alphaSupport ? '<input type="radio" id="jPicker_Alpha_' + List.length + '" name="jPicker_Mode_' + List.length + '" value="a" title="' + localization.tooltips.alpha.radio + '"' + (settings.color.mode == 'a' ? ' checked="checked"' : '') + '/>' : '&nbsp;') + '</td><td class="Label">' + (win.alphaSupport ? '<label for="jPicker_Alpha_' + List.length + '" title="' + localization.tooltips.alpha.radio + '">A:</label>' : '&nbsp;') + '</td><td class="Text">' + (win.alphaSupport ? '<input type="text" maxlength="3" value="' + color.active.val('a') + '" title="' + localization.tooltips.alpha.textbox + '"/>&nbsp;%' : '&nbsp;') + '</td></tr><tr class="Hex"><td colspan="3" class="Text"><label for="jPicker_Hex_' + List.length + '" title="' + localization.tooltips.hex.textbox + '">#:</label><input type="text" maxlength="6" class="Hex" id="jPicker_Hex_' + List.length+'" value="' + color.active.val('hex') + '" title="' + localization.tooltips.hex.textbox + '"/>' + (win.alphaSupport ? '<input type="text" maxlength="2" class="AHex" value="' + color.active.val('ahex').substring(6) + '" title="' + localization.tooltips.hex.alpha + '"/></td>' : '&nbsp;') + '</tr></tbody></table>';
+                var all = color.active.val('all');
+                var controlHtml='<table class="jPicker" cellpadding="0" cellspacing="0"><tbody>' + (win.expandable ? '<tr><td class="Move" colspan="5">&nbsp;</td></tr>' : '') + '<tr><td rowspan="9"><h2 class="Title">' + (win.title || localization.text.title) + '</h2><div class="Map"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><img src="' + images.clientPath + images.colorMap.arrow.file + '" class="Arrow"/></div></td><td rowspan="9"><div class="Bar"><span class="Map1">&nbsp;</span><span class="Map2">&nbsp;</span><span class="Map3">&nbsp;</span><span class="Map4">&nbsp;</span><span class="Map5">&nbsp;</span><span class="Map6">&nbsp;</span><img src="' + images.clientPath + images.colorBar.arrow.file + '" class="Arrow"/></div></td><td colspan="2" class="Preview">' + localization.text.newColor + '<div><span class="Active" title="' + localization.tooltips.colors.newColor + '">&nbsp;</span><span class="Current" title="' + localization.tooltips.colors.currentColor + '">&nbsp;</span></div>' + localization.text.currentColor + '</td><td rowspan="9" class="Button"><input type="button" class="Ok" value="' + localization.text.ok + '" title="' + localization.tooltips.buttons.ok + '"/><input type="button" class="Cancel" value="' + localization.text.cancel + '" title="' + localization.tooltips.buttons.cancel + '"/><hr/><div class="Grid">&nbsp;</div></td></tr><tr class="Hue"><td class="Radio"><label title="' + localization.tooltips.hue.radio + '"><input type="radio" value="h"' + (settings.color.mode == 'h' ? ' checked="checked"' : '') + '/>H:</label></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.h : '') + '" title="' + localization.tooltips.hue.textbox + '"/>&nbsp;&deg;</td></tr><tr class="Saturation"><td class="Radio"><label title="' + localization.tooltips.saturation.radio + '"><input type="radio" value="s"' + (settings.color.mode == 's' ? ' checked="checked"' : '') + '/>S:</label></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.s : '') + '" title="' + localization.tooltips.saturation.textbox + '"/>&nbsp;%</td></tr><tr class="Value"><td class="Radio"><label title="' + localization.tooltips.value.radio + '"><input type="radio" value="v"' + (settings.color.mode == 'v' ? ' checked="checked"' : '') + '/>V:</label><br/><br/></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.v : '') + '" title="' + localization.tooltips.value.textbox + '"/>&nbsp;%<br/><br/></td></tr><tr class="Red"><td class="Radio"><label title="' + localization.tooltips.red.radio + '"><input type="radio" value="r"' + (settings.color.mode == 'r' ? ' checked="checked"' : '') + '/>R:</label></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.r : '') + '" title="' + localization.tooltips.red.textbox + '"/></td></tr><tr class="Green"><td class="Radio"><label title="' + localization.tooltips.green.radio + '"><input type="radio" value="g"' + (settings.color.mode == 'g' ? ' checked="checked"' : '') + '/>G:</label></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.g : '') + '" title="' + localization.tooltips.green.textbox + '"/></td></tr><tr class="Blue"><td class="Radio"><label title="' + localization.tooltips.blue.radio + '"><input type="radio" value="b"' + (settings.color.mode == 'b' ? ' checked="checked"' : '') + '/>B:</label></td><td class="Text"><input type="text" maxlength="3" value="' + (all != null ? all.b : '') + '" title="' + localization.tooltips.blue.textbox + '"/></td></tr><tr class="Alpha"><td class="Radio">' + (win.alphaSupport ? '<label title="' + localization.tooltips.alpha.radio + '"><input type="radio" value="a"' + (settings.color.mode == 'a' ? ' checked="checked"' : '') + '/>A:</label>' : '&nbsp;') + '</td><td class="Text">' + (win.alphaSupport ? '<input type="text" maxlength="4" value="' + (all != null ? (Math.round((all.a * 1000) / 255) / 10) : '') + '" title="' + localization.tooltips.alpha.textbox + '"/>&nbsp;%' : '&nbsp;') + '</td></tr><tr class="Hex"><td colspan="2" class="Text"><label title="' + localization.tooltips.hex.textbox + '">#:<input type="text" maxlength="6" class="Hex" value="' + (all != null ? all.hex : '') + '"/></label>' + (win.alphaSupport ? '<input type="text" maxlength="2" class="AHex" value="' + (all != null ? all.ahex.substring(6) : '') + '" title="' + localization.tooltips.hex.alpha + '"/></td>' : '&nbsp;') + '</tr></tbody></table>';
                 if (win.expandable)
                 {
                   container.html(controlHtml);
@@ -1620,7 +1632,7 @@
                   });
                 colorBar.bind(colorBarValueChanged);
                 colorPicker = new ColorValuePicker(tbody, color.active, win.expandable && win.bindToInput ? win.input : null);
-                var hex = color.active.val('hex'),
+                var hex = all != null ? all.hex : null,
                     preview = tbody.find('.Preview'),
                     button = tbody.find('.Button');
                 activePreview = preview.find('.Active:first').css({ backgroundColor: hex && '#' + hex || 'transparent' });
@@ -1669,7 +1681,7 @@
                   iconColor = $this.icon.find('.Color:first').css({ backgroundColor: hex && '#' + hex || 'transparent' });
                   iconAlpha = $this.icon.find('.Alpha:first');
                   setImg.call($this, iconAlpha, images.clientPath + 'bar-opacity.png');
-                  setAlpha.call($this, iconAlpha, 100 - color.active.val('a'));
+                  setAlpha.call($this, iconAlpha, (((255 - (all != null ? all.a : 0)) * 100) / 255) | 0);
                   iconImage = $this.icon.find('.Image:first').css(
                     {
                       backgroundImage: 'url(' + images.clientPath + images.picker.file + ')'
@@ -1678,7 +1690,7 @@
                     win.input.css(
                       {
                         backgroundColor: hex && '#' + hex || 'transparent',
-                        color: color.active.val('v') > 75 ? '#000000' : '#ffffff'
+                        color: all == null || all.v > 75 ? '#000000' : '#ffffff'
                       });
                   moveBar = tbody.find('.Move:first').bind('mousedown', moveBarMouseDown);
                   color.active.bind(expandableColorChanged);
@@ -1954,4 +1966,4 @@
           }
         }
     };
-})(jQuery, '1.1.3');
+})(jQuery, '1.1.4');

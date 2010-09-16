@@ -25,9 +25,7 @@
   width: 100%;
 }
 .jPicker.Container {
-  display: none;
-  z-index: 10; /* make sure container draws above color picker icon in Firefox/Safari/Chrome/Opera/etc. -
-                  IE calculates z-index so this won't work - we will hide all color picker icons placed after the selected one in code when shown in IE */
+  z-index: 10;
 }
 table.jPicker {
   background-color: #efefef;
@@ -37,12 +35,16 @@ table.jPicker {
   margin: 0px;
   padding: 5px;
   width: 545px;
+  z-index: 20;
 }
 .jPicker .Move {
   background-color: #dddddd;
-  border: 1px outset #aaa;
+  border-color: #fff #666 #666 #fff;
+  border-style: solid;
+  border-width: 1px;
   cursor: move;
   height: 12px;
+  padding: 0px;
 }
 .jPicker .Title {
   font-size: 11px !important;
@@ -167,14 +169,10 @@ table.jPicker {
 .jPicker td.Radio {
   margin: 0px;
   padding: 0px;
-  width: 20px;
+  width: 30px;
 }
 .jPicker td.Radio input {
-  margin: 0px;
-  padding: 0px;
-}
-.jPicker td.Label {
-  margin: 0px;
+  margin: 0px 5px 0px 0px;
   padding: 0px;
 }
 .jPicker td.Text {
@@ -207,6 +205,7 @@ table.jPicker {
 }
 .jPicker .Grid {
   text-align: center;
+  width: 115px;
 }
 .jPicker .Grid span.QuickColor {
   border: 1px inset #aaa;

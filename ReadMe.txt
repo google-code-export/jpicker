@@ -1,4 +1,4 @@
-﻿jPicker 1.1.3
+﻿jPicker 1.1.4
 
 jQuery Plugin for Photoshop style color picker
 
