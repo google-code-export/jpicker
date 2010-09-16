@@ -4,10 +4,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Digital Magic Productions - jPicker - A jQuery Color Picker Plugin</title>
-  <link rel="Stylesheet" type="text/css" href="css/jpicker-1.1.3.min.css" />
+  <link rel="Stylesheet" type="text/css" href="css/jpicker-1.1.4.min.css" />
   <link rel="Stylesheet" type="text/css" href="jPicker.css" />
   <script src="jquery-1.4.2.min.js" type="text/javascript"></script>
-  <script src="jpicker-1.1.3.min.js" type="text/javascript"></script>
+  <script src="jpicker-1.1.4.min.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(function()
       {
@@ -174,10 +174,10 @@
     });
 &lt;/script&gt;
 &lt;input class="Multiple" type="text" value="e2ddcf" /&gt;&lt;br /&gt;
-&lt;input class="Multiple" type="text" value="888888" /&gt;&lt;br /&gt;
+&lt;input class="Multiple" type="text" value="" /&gt;&lt;br /&gt;
 &lt;input class="Multiple" type="text" value="fda0f7" /&gt;</pre>
       <input class="Multiple" type="text" value="e2ddcf" /><br />
-      <input class="Multiple" type="text" value="888888" /><br />
+      <input class="Multiple" type="text" value="" /><br />
       <input class="Multiple" type="text" value="fda0f7" /><br />
     </p><hr /><br />
     <h2>jPicker Callback Functions</h2>
@@ -446,9 +446,9 @@
       Definition of the jPicker.Color class.<br />
       <pre>
 (jQuery).jPicker.Color()
-(jQuery).jPicker.Color({ r: (0-255), g: (0-255), b: (0-255), [a: (0-100)] })
-(jQuery).jPicker.Color({ h: (0-360), s: (0-100), v: (0-100), [a: (0-100)] })
-(jQuery).jPicker.Color({ hex: 'ffffff', [a: (0-100)] })
+(jQuery).jPicker.Color({ r: (0-255), g: (0-255), b: (0-255), [a: (0-255)] })
+(jQuery).jPicker.Color({ h: (0-360), s: (0-100), v: (0-100), [a: (0-255)] })
+(jQuery).jPicker.Color({ hex: 'ffffff', [a: (0-255)] })
 (jQuery).jPicker.Color({ ahex: 'ffffffff' })
 {
   val: function(name, value, context),
@@ -463,7 +463,7 @@ val(name) : get value
   'r':     red         (0-255)
   'g':     green       (0-255)
   'b':     blue        (0-255)
-  'a':     alpha       (0-100)
+  'a':     alpha       (0-255)
   'h':     hue         (0-360)
   's':     saturation  (0-100)
   'v':     value       (0-100)
@@ -477,9 +477,9 @@ val(name) : get value
     val('h'):     (0-360)
     val('hex'):   (000000-ffffff)
     val('rg'):    { r: (0-255), g: (0-255) }
-    val('rgba'):  { r: (0-255), g: (0-255), b: (0-255), a: (0-100) }
-    val('hvga'):  { h: (0-255), v: (0-100), g: (0-255), a: (0-100) }
-    val('all'):   { r: (0-255), g: (0-255), b: (0-255), a: (0-100), h: (0-360) --
+    val('rgba'):  { r: (0-255), g: (0-255), b: (0-255), a: (0-255) }
+    val('hvga'):  { h: (0-255), v: (0-100), g: (0-255), a: (0-255) }
+    val('all'):   { r: (0-255), g: (0-255), b: (0-255), a: (0-255), h: (0-360) --
                     s: (0-100), v: (0-100), hex: (000000-ffffff), --
                     ahex: (00000000-ffffffff) }
 
@@ -488,7 +488,7 @@ val(name, value, [context]) : set value
   'r':     red         (0-255)
   'g':     green       (0-255)
   'b':     blue        (0-255)
-  'a':     alpha       (0-100)
+  'a':     alpha       (0-255)
   'h':     hue         (0-360)
   's':     saturation  (0-100)
   'v':     value       (0-100)
@@ -501,7 +501,7 @@ val(name, value, [context]) : set value
     val('h', (0-360)) || val('h', { h: (0-360) })
     val('hex', (000000-ffffff)) || val('hex', { hex: (000000-ffffff) })
     val('rg', { r: (0-255), g: (0-255) })
-    val('rgba', { r: (-255), g: (0-255), b: (0-255), a: (0-100) })
+    val('rgba', { r: (-255), g: (0-255), b: (0-255), a: (0-255) })
     val(null, { r: (0-255), g: (0-255) })
     val('hvga'):  incorrect usage - cannot set hsv AND rgb as they will conflict</pre>
     </p><hr /><br />
@@ -511,14 +511,14 @@ val(name, value, [context]) : set value
       <pre>
 (jQuery).jPicker.ColorMethods.hexToRgba:
     function(hex)
-    returns { r: (0-255), g: (0-255), b: (0-255), a: (0-100) }
+    returns { r: (0-255), g: (0-255), b: (0-255), a: (0-255) }
     
 (jQuery).jPicker.ColorMethods.validateHex:
     function(hex)
     returns new hex string
     
 (jQuery).jPicker.ColorMethods.rgbaToHex:
-    function({ r: (0-255), g: (0-255), b: (0-255), a: (0-100) })
+    function({ r: (0-255), g: (0-255), b: (0-255), a: (0-255) })
     returns hex string
     
 (jQuery).jPicker.ColorMethods.intToHex:
@@ -567,6 +567,18 @@ val(name, value, [context]) : set value
     </ul><hr />
     <h2>Change Log</h2>
     <ul>
+      <li>
+        <h3>V1.1.4:</h3>
+        <ul>
+          <li>Changed "alpha" range from 0-100 to 0-255 to correct truncating and rounding errors caused by attempting to get an integer percentage that matches a hex value.</li>
+          <li>"alpha" percentage display will now show up to 1 decimal point for more accurate representation of "alpha" value.</li>
+          <li>Color object now accepts "alpha" values in a range of 0-255 and also returns the same when getting the "alpha" value. You will need to run ((alpha * 100) / 255) to retrieve a percentage value.</li>
+          <li>Reworked the table layout and labels to remove the need for the label to reference the radio input box. This reduces injected code and removes the need to generate unique ids on the radio buttons.</li>
+          <li>Transparent/invisible caret on NULL color is now corrected - uses the same caret color as a white color.</li>
+          <li>Setting a binded input value of "" or no value attribute will now create a NULL color on initialization instead of the settings default color.</li>
+          <li>Added a dynamic, invisible "iframe" behind a dialog picker in all browsers that fail jQuery.support.boxModel (currently IE <= 7 Quirks Mode). This prevents "select" box from showing through the picker.</li>
+        </ul>
+      </li>
       <li>
         <h3>V1.1.3:</h3>
         <ul>

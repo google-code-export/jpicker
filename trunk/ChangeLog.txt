@@ -1,5 +1,14 @@
 ﻿Change Log
 ______________
+1.1.4
+  Changed "alpha" range from 0-100 to 0-255 to correct truncating and rounding errors caused by attempting to get an integer percentage that matches a hex value.
+  "alpha" percentage display will now show up to 1 decimal point for more accurate representation of "alpha" value.
+  Color object now accepts "alpha" values in a range of 0-255 and also returns the same when getting the "alpha" value. You will need to run ((alpha * 100) / 255) to retrieve a percentage value.
+  Reworked the table layout and labels to remove the need for the label to reference the radio input box. This reduces injected code and removes the need to generate unique ids on the radio buttons.
+  Transparent/invisible caret on NULL color is now corrected - uses the same caret color as a white color.
+  Setting a binded input value of "" or no value attribute will now create a NULL color on initialization instead of the settings default color.
+  Added a dynamic, invisible "iframe" behind a dialog picker in all browsers that fail jQuery.support.boxModel (currently IE <= 7 Quirks Mode). This prevents "select" box from showing through the picker.
+
 1.1.3
   Now adding popup color pickers to document.body instead of inline with the popup control. This corrects issues with the picker not showing beyond a relative container scope.
   No longer need to hide popup icon in Internet Explorer for picker elements lower in the DOM than the currently active one since the picker itself is attached to document.body (it is always higher in the DOM now).
