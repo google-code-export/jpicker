@@ -4,10 +4,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Digital Magic Productions - jPicker - A jQuery Color Picker Plugin</title>
-  <link rel="Stylesheet" type="text/css" href="css/jpicker-1.1.4.min.css" />
+  <link rel="Stylesheet" type="text/css" href="css/jpicker-1.1.5.min.css" />
   <link rel="Stylesheet" type="text/css" href="jPicker.css" />
   <script src="jquery-1.4.2.min.js" type="text/javascript"></script>
-  <script src="jpicker-1.1.4.min.js" type="text/javascript"></script>
+  <script src="jpicker-1.1.5.min.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(function()
       {
@@ -315,6 +315,9 @@
     liveUpdate: true, // set false if you want the user to click "OK" before the
                       // binded input box updates values
     alphaSupport: false, // set to true to enable alpha picking
+    alphaPrecision: 0, // set decimal precision for alpha percentage display -
+                       // hex codes do not map directly to percentage integers -
+                       // range 0-2
     updateInputColor: true // set to false to prevent binded input colors from
                            // changing
   },
@@ -446,10 +449,10 @@
       Definition of the jPicker.Color class.<br />
       <pre>
 (jQuery).jPicker.Color()
+(jQuery).jPicker.Color({ ahex: 'ffffffff' })
+(jQuery).jPicker.Color({ hex: 'ffffff', [a: (0-255)] })
 (jQuery).jPicker.Color({ r: (0-255), g: (0-255), b: (0-255), [a: (0-255)] })
 (jQuery).jPicker.Color({ h: (0-360), s: (0-100), v: (0-100), [a: (0-255)] })
-(jQuery).jPicker.Color({ hex: 'ffffff', [a: (0-255)] })
-(jQuery).jPicker.Color({ ahex: 'ffffffff' })
 {
   val: function(name, value, context),
   bind: function(callback) where callback is function(color, [context]),
@@ -567,6 +570,15 @@ val(name, value, [context]) : set value
     </ul><hr />
     <h2>Change Log</h2>
     <ul>
+      <li>
+        <h3>V1.1.5:</h3>
+        <ul>
+          <li>Corrected Color object constructor to allow setting of the "alpha" value as per the documentation which previously didn't work.</li>
+          <li>Added support for translucency for quickList colors with checkered background - Only available if "alphaSupport" is enabled.</li>
+          <li>Restricted default color to "alpha" of 255 if "alphaSupport" is disabled - It will now assign an explicit alpha of 255 when disabled.</li>
+          <li>Added new setting variable "alphaPrecision" which indicates the number of decimal points to allow in the alpha percentage display - Now defaults to 0.</li>
+        </ul>
+      </li>
       <li>
         <h3>V1.1.4:</h3>
         <ul>
