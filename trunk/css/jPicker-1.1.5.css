@@ -169,7 +169,7 @@ table.jPicker {
 .jPicker td.Radio {
   margin: 0px;
   padding: 0px;
-  width: 30px;
+  width: 31px;
 }
 .jPicker td.Radio input {
   margin: 0px 5px 0px 0px;
@@ -205,13 +205,12 @@ table.jPicker {
 }
 .jPicker .Grid {
   text-align: center;
-  width: 115px;
+  width: 114px;
 }
 .jPicker .Grid span.QuickColor {
   border: 1px inset #aaa;
   cursor: pointer;
-  display: block;
-  float: left;
+  display: inline-block;
   height: 15px;
   line-height: 15px;
   margin: 0px;
