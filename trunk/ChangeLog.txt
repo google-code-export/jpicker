@@ -1,10 +1,15 @@
 ﻿Change Log
 ______________
+1.1.6
+  Corrected bug preventing selections inside input values in some browsers - the onselectstart function no longer captures on input boxes.
+  Added support for up/down arrow adjustments of the currently focused input box making the picker more keyboard friendly.
+  Added ticks around the backgroundImage assignments to correct for paths with whitespace.
+
 1.1.5
   Corrected Color object constructor to allow setting of the "alpha" value as per the documentation which previously didn't work.
   Added support for translucency for quickList colors with checkered background - Only available if "alphaSupport" is enabled.
   Restricted default color to "alpha" of 255 if "alphaSupport" is disabled - It will now assign an explicit alpha of 255 when disabled.
-  >Added new setting variable "alphaPrecision" which indicates the number of decimal points to allow in the alpha percentage display - Now defaults to 0.
+  Added new setting variable "alphaPrecision" which indicates the number of decimal points to allow in the alpha percentage display - Now defaults to 0.
 
 1.1.4
   Changed "alpha" range from 0-100 to 0-255 to correct truncating and rounding errors caused by attempting to get an integer percentage that matches a hex value.

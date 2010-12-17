@@ -25,6 +25,7 @@
   width: 100%;
 }
 .jPicker.Container {
+  color: #000;
   z-index: 10;
 }
 table.jPicker {
@@ -50,7 +51,7 @@ table.jPicker {
   font-size: 11px !important;
   font-weight: bold;
   margin: -2px 0px 0px 0px;
-  padding: 0px;
+  padding: 10px 0px 0px 0px;
   text-align: center;
   width: 100%;
 }
@@ -61,7 +62,7 @@ table.jPicker {
   border-top: 2px solid #9a9a9a;
   cursor: crosshair;
   height: 260px; /* IE 6 incorrectly draws border inside the width and height instead of outside - We will fix this to 256px later */
-  margin: 0px 5px 0px 5px;
+  margin: 0px 10px 10px 10px;
   overflow: hidden; /* hide the overdraw of the Color Map icon when at edge of viewing box */
   padding: 0px;
   position: relative; /* make this element an absolute positioning container */
@@ -131,6 +132,7 @@ table.jPicker {
 }
 .jPicker .Preview {
   font-size: 9px;
+  padding: 5px 0px 0px 0px;
   text-align: center;
 }
 .jPicker .Preview div {
@@ -155,17 +157,25 @@ table.jPicker {
   border-top-width: 0px;
   cursor: pointer;
 }
+.jPicker input {
+  font-size: 13px;
+}
 .jPicker .Button {
   text-align: center;
+  padding: 0px 4px;
   width: 115px;
 }
 .jPicker .Button input {
+  padding: 2px 0px;
   width: 100px;
 }
 .jPicker .Button .Ok {
   margin: 12px 0px 5px 0px;
 }
-
+.jPicker td {
+  margin: 0px;
+  padding: 0px;
+}
 .jPicker td.Radio {
   margin: 0px;
   padding: 0px;
